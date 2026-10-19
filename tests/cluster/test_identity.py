@@ -71,7 +71,10 @@ def test_buyer_cannot_approve(passwords):
 
 def test_wrong_password_is_rejected(passwords):
     response = password_grant("smoke-test", "morgan", passwords["morgan"] + "x")
-    assert response.status_code == 401
+    # RFC 6749 section 5.2: bad resource-owner credentials are a 400 invalid_grant.
+    assert response.status_code == 400
+    assert response.json()["error"] == "invalid_grant"
+    assert "access_token" not in response.json()
 
 
 def test_agent_ui_client_does_not_allow_password_grant(passwords):
