@@ -53,8 +53,9 @@ def approve(base_url: str, token: str, draft_id: int) -> httpx.Response:
 def test_viewer_can_read_inventory(mcp_url, user_token):
     result = call_tool(mcp_url, user_token("val"), "get_inventory", {"material_id": "BIL-6063-178"})
     assert not result.is_error, result.content
-    rows = json.loads(result.content[0].text)
-    assert rows[0]["material_id"] == "BIL-6063-178"
+    # List results arrive as structured content; dict results as one JSON text block.
+    rows = result.structured_content["result"]
+    assert [row["material_id"] for row in rows] == ["BIL-6063-178"]
 
 
 def test_viewer_cannot_draft_and_the_denial_is_audited(mcp_url, user_token, psql):

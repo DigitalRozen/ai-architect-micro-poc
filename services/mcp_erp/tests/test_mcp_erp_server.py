@@ -112,3 +112,9 @@ def test_policy_denial_reaches_the_model_as_an_error_result(live_server, make_to
     result = call_tool(live_server, make_token("val", roles=("viewer",)), "draft_po", GOOD_DRAFT)
     assert result.is_error
     assert "denied by policy" in result.content[0].text
+
+
+def test_list_results_arrive_as_structured_content(live_server, make_token):
+    result = call_tool(live_server, make_token("val", roles=("viewer",)), "get_inventory")
+    assert not result.is_error, result.content
+    assert result.structured_content["result"][0]["material_id"] == "BIL-6063-178"
