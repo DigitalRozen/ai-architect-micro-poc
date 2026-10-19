@@ -38,6 +38,9 @@ spec:
             - name: AI_WRITER_PASSWORD
               valueFrom:
                 secretKeyRef: { name: postgres-credentials, key: ai-writer-password }
+            - name: LITELLM_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: litellm-password }
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "postgres", "-d", "erp"]

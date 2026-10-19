@@ -51,3 +51,5 @@ jobs:
           kubectl get pods -A
           kubectl -n platform logs statefulset/postgres --tail=100
           kubectl -n platform logs deployment/keycloak --tail=100
+          kubectl -n platform logs deployment/litellm --tail=100
+          kubectl -n platform logs job/llm-key-bootstrap --tail=50

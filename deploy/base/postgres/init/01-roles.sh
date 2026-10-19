@@ -1,10 +1,15 @@
-# Login roles for the AI layer. Passwords are injected from a Kubernetes Secret.
+# Login roles for the AI layer and the LLM gateway. Passwords are injected from a Kubernetes Secret.
 # Grants are defined in 02-schema.sql, after the objects exist.
 # The postgres entrypoint sources this file (it is not executable in the ConfigMap),
 # so it must not change shell options.
 
 psql -v ON_ERROR_STOP=1 --username postgres --dbname erp \
-  -v reader_pw="$AI_READER_PASSWORD" -v writer_pw="$AI_WRITER_PASSWORD" <<'SQL'
+  -v reader_pw="$AI_READER_PASSWORD" -v writer_pw="$AI_WRITER_PASSWORD" \
+  -v litellm_pw="$LITELLM_DB_PASSWORD" <<'SQL'
 CREATE ROLE ai_reader LOGIN PASSWORD :'reader_pw';
 CREATE ROLE ai_writer LOGIN PASSWORD :'writer_pw';
+
+-- The LLM gateway keeps keys, budgets and spend logs in its own database.
+CREATE ROLE litellm LOGIN PASSWORD :'litellm_pw';
+CREATE DATABASE litellm OWNER litellm;
 SQL

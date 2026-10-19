@@ -13,10 +13,17 @@ dev = [
     "pyjwt[crypto]>=2.15.1",
     "pytest>=8",
     "ruff>=0.6",
+    "scripted-llm",
 ]
 
 [tool.uv]
 package = false
+
+[tool.uv.workspace]
+members = ["services/*"]
+
+[tool.uv.sources]
+scripted-llm = { workspace = true }
 
 [tool.ruff]
 line-length = 100
@@ -26,8 +33,9 @@ target-version = "py312"
 select = ["E", "F", "I", "B", "UP", "S"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S603", "S607"]
+"**/tests/**" = ["S101", "S603", "S607"]
+"**/scripted_llm/app.py" = ["S104"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "services"]
 markers = ["cluster: needs the running k3d cluster (make up)"]
