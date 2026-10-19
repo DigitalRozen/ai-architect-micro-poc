@@ -32,7 +32,7 @@ spec:
 
               register() {
                 user="$1"; key="$2"; budget="$3"; rpm="$4"
-                if curl -fsS -o /dev/null -H "Authorization: Bearer $MASTER_KEY" \
+                if curl -fs -o /dev/null -H "Authorization: Bearer $MASTER_KEY" \
                      "$GW/key/info?key=$key"; then
                   echo "key for $user already registered"
                   return
@@ -48,7 +48,7 @@ spec:
                     \"rpm_limit\": $rpm,
                     \"metadata\": {\"cost_center\": \"procurement\"}
                   }" >/dev/null
-                echo "registered key for $user (budget \$$budget/30d, $rpm rpm)"
+                echo "registered key for $user (budget USD $budget per 30d, $rpm rpm)"
               }
 
               register alice  "$KEY_ALICE"  1.00 30

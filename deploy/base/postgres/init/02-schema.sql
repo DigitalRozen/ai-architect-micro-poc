@@ -6,7 +6,7 @@
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON DATABASE erp FROM PUBLIC;
-GRANT CONNECT ON DATABASE erp TO ai_reader, ai_writer;
+GRANT CONNECT ON DATABASE erp TO ai_reader, ai_writer, erp_integration;
 
 -- ---------------------------------------------------------------- erp (core)
 CREATE SCHEMA erp;

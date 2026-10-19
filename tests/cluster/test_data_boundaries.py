@@ -5,6 +5,13 @@ import pytest
 pytestmark = pytest.mark.cluster
 
 
+def assert_denied_by_grant(result) -> None:
+    """Denied by an object-level grant, not merely unable to connect."""
+    assert not result.ok
+    assert "permission denied for" in result.output, result.output
+    assert "permission denied for database" not in result.output, result.output
+
+
 def test_seed_is_visible_through_ai_layer(psql):
     result = psql.run("ai_reader", "SELECT count(*) FROM ai.open_orders;")
     assert result.ok, result.output
@@ -27,7 +34,7 @@ def test_shortage_is_visible_for_the_demo_material(psql):
 def test_ai_roles_cannot_read_core_erp(psql, role):
     result = psql.run(role, "SELECT * FROM erp.inventory;")
     assert not result.ok
-    assert "permission denied" in result.output
+    assert_denied_by_grant(result)
 
 
 @pytest.mark.parametrize("role", ["ai_reader", "ai_writer"])
@@ -39,7 +46,7 @@ def test_ai_roles_cannot_write_purchase_orders(psql, role):
     """
     result = psql.run(role, sql)
     assert not result.ok
-    assert "permission denied" in result.output
+    assert_denied_by_grant(result)
 
 
 def test_ai_reader_cannot_create_drafts(psql):
@@ -49,7 +56,7 @@ def test_ai_reader_cannot_create_drafts(psql):
     """
     result = psql.run("ai_reader", sql)
     assert not result.ok
-    assert "permission denied" in result.output
+    assert_denied_by_grant(result)
 
 
 def test_ai_writer_can_create_drafts(psql):
@@ -79,7 +86,7 @@ def test_audit_is_append_only_even_for_superuser(psql):
 def test_ai_writer_cannot_read_audit_log(psql):
     result = psql.run("ai_writer", "SELECT * FROM audit.events;")
     assert not result.ok
-    assert "permission denied" in result.output
+    assert_denied_by_grant(result)
 
 
 @pytest.mark.parametrize(
@@ -94,11 +101,18 @@ def test_ai_writer_cannot_read_audit_log(psql):
 )
 def test_erp_integration_role_can_only_do_the_approval_step(psql, statement):
     result = psql.run("erp_integration", statement)
-    assert not result.ok, statement
-    assert "permission denied" in result.output
+    assert_denied_by_grant(result)
 
 
 def test_ai_writer_cannot_approve_drafts(psql):
     result = psql.run("ai_writer", "UPDATE ai.po_drafts SET status = 'approved';")
     assert not result.ok
-    assert "permission denied" in result.output
+    assert_denied_by_grant(result)
+
+
+@pytest.mark.parametrize("role", ["ai_reader", "ai_writer", "erp_integration"])
+def test_every_application_role_can_connect(psql, role):
+    """Guards the denial tests above: they only mean something if the role can log in."""
+    result = psql.run(role, "SELECT current_user;")
+    assert result.ok, result.output
+    assert result.output == role
