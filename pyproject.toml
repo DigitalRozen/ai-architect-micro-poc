@@ -1,0 +1,30 @@
+[project]
+name = "sovereign-agent-reference"
+version = "0.1.0"
+description = "Reference architecture for a governed enterprise agent on Kubernetes (demo, not production)."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S603", "S607"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

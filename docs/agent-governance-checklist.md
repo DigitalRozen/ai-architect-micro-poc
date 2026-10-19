@@ -13,4 +13,4 @@ Use before tool selection. Vendor-neutral.
 9. Cost / rate: how do we bound spend and loops?
 10. Exit: how do we decommission without orphaned access?
 
-Map answers to ADR-001 layers before buying an NHI or DSPM product.
+Map answers to the ADR-0010 layers before buying an NHI or DSPM product.
