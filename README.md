@@ -56,8 +56,9 @@ make down              # delete the cluster and its data
 
 | Layer | What is enforced | Tests |
 |---|---|---|
-| Database | AI roles cannot read or write the core `erp` schema; they can only create drafts in `ai`; the audit log rejects updates and deletes | `tests/cluster/test_data_boundaries.py` |
+| Database | AI roles cannot read or write the core `erp` schema; they can only create drafts in `ai`; only the approval role can create an ERP order; the audit log rejects updates and deletes | `tests/cluster/test_data_boundaries.py` |
 | Identity | Signed tokens with the right issuer and `mcp-erp` audience, one role per user, the buyer cannot approve, the app client refuses the password grant | `tests/cluster/test_identity.py` |
+| Tool server (MCP) | The server verifies the user's own token; roles map to tools; a deterministic draft policy rejects the planted injection; the model has no tool that places an order; approval needs the manager's token and rejects self-approval; every decision is audited | `tests/cluster/test_mcp_erp.py`, `services/mcp_erp/tests/` |
 | LLM gateway | No key, no model; keys are bound to a user and a model allow-list; rate limits return 429; spent budgets block calls; spend is attributed per key | `tests/cluster/test_gateway.py` |
 
 Without an `OPENROUTER_API_KEY` every model call goes to `scripted-llm`, a deterministic local model,
