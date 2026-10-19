@@ -42,7 +42,7 @@ A planted prompt injection in the ERP data tries to make the agent submit an inf
 ## Quickstart
 
 Requires Docker, [k3d](https://k3d.io) v5.8+, kubectl, openssl and [uv](https://docs.astral.sh/uv/).
-Tested on Linux and WSL2 (Ubuntu); CI runs the same commands on every push.
+Targets Linux and WSL2 (Ubuntu). CI runs `make up` and `make smoke` on an Ubuntu runner on every push.
 
 ```bash
 cp .env.example .env   # optional for now; all values may stay empty
