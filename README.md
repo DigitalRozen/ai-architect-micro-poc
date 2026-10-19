@@ -33,7 +33,7 @@ A planted prompt injection in the ERP data tries to make the agent submit an inf
 | 0 | Repo skeleton, lint, tests, CI, secret scanning | done |
 | 1 | k3d cluster, Postgres, synthetic ERP data, CI smoke test on k3d | done |
 | 2 | Keycloak realm, users, roles | done |
-| 3 | LLM gateway with budgets and rate limits | planned |
+| 3 | LLM gateway with per-user keys, budgets, rate limits, spend attribution | done |
 | 4 | MCP ERP tool server with per-tool authorization | planned |
 | 5 | Code sandbox on Kubernetes Jobs | planned |
 | 6 | Agent, approval UI, audit, end-to-end scenario | planned |
@@ -52,9 +52,16 @@ make smoke             # run tests against the live cluster
 make down              # delete the cluster and its data
 ```
 
-`make smoke` currently proves the data boundary at the database level: the AI roles cannot read
-or write the core `erp` schema, can only create drafts in the `ai` schema, and the audit log
-rejects updates and deletes (see `tests/cluster/test_data_boundaries.py`).
+`make smoke` runs against the live cluster and currently proves:
+
+| Layer | What is enforced | Tests |
+|---|---|---|
+| Database | AI roles cannot read or write the core `erp` schema; they can only create drafts in `ai`; the audit log rejects updates and deletes | `tests/cluster/test_data_boundaries.py` |
+| Identity | Signed tokens with the right issuer and `mcp-erp` audience, one role per user, the buyer cannot approve, the app client refuses the password grant | `tests/cluster/test_identity.py` |
+| LLM gateway | No key, no model; keys are bound to a user and a model allow-list; rate limits return 429; spent budgets block calls; spend is attributed per key | `tests/cluster/test_gateway.py` |
+
+Without an `OPENROUTER_API_KEY` every model call goes to `scripted-llm`, a deterministic local model,
+so the whole stack runs offline and in CI.
 
 ## Development
 
