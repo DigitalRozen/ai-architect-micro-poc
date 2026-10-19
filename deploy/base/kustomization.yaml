@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespaces.yaml
+  - postgres/statefulset.yaml
+  - postgres/service.yaml
+
+# Init scripts run once, on first start of an empty data volume.
+# After editing them, recreate the cluster: make down up
+configMapGenerator:
+  - name: postgres-init
+    namespace: platform
+    files:
+      - postgres/init/01-roles.sh
+      - postgres/init/02-schema.sql
+      - postgres/init/03-seed.sql

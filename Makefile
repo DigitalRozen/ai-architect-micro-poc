@@ -1,4 +1,6 @@
-.PHONY: help sync lint fmt test
+.PHONY: help sync lint fmt test up down smoke
+
+CLUSTER := sovereign-agent
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -14,5 +16,14 @@ fmt: ## Auto-format
 	uv run ruff check --fix .
 	uv run ruff format .
 
-test: ## Run unit tests
-	uv run pytest -q
+test: ## Run unit tests (no cluster needed)
+	uv run pytest -q -m "not cluster"
+
+up: ## Create the local k3d cluster and deploy everything
+	./scripts/up.sh
+
+down: ## Delete the local cluster and all its data
+	k3d cluster delete $(CLUSTER)
+
+smoke: ## Run tests against the running cluster
+	uv run pytest -q -m cluster
