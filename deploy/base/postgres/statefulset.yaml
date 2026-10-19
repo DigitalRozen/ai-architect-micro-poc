@@ -41,6 +41,9 @@ spec:
             - name: LITELLM_DB_PASSWORD
               valueFrom:
                 secretKeyRef: { name: postgres-credentials, key: litellm-password }
+            - name: ERP_INTEGRATION_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: postgres-credentials, key: erp-integration-password }
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "postgres", "-d", "erp"]

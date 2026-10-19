@@ -34,7 +34,7 @@ A planted prompt injection in the ERP data tries to make the agent submit an inf
 | 1 | k3d cluster, Postgres, synthetic ERP data, CI smoke test on k3d | done |
 | 2 | Keycloak realm, users, roles | done |
 | 3 | LLM gateway with per-user keys, budgets, rate limits, spend attribution | done |
-| 4 | MCP ERP tool server with per-tool authorization | planned |
+| 4 | MCP ERP tool server with per-tool authorization, draft policy, human approval endpoint | done |
 | 5 | Code sandbox on Kubernetes Jobs | planned |
 | 6 | Agent, approval UI, audit, end-to-end scenario | planned |
 | 7 | Architecture docs, ADRs, demo script | planned |

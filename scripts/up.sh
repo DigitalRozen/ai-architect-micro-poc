@@ -4,7 +4,10 @@ set -euo pipefail
 
 CLUSTER=sovereign-agent
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IMAGES=(scripted_llm:sovereign-agent/scripted-llm:dev)
+IMAGES=(
+  scripted_llm:sovereign-agent/scripted-llm:dev
+  mcp_erp:sovereign-agent/mcp-erp:dev
+)
 
 for bin in docker k3d kubectl openssl curl; do
   command -v "$bin" >/dev/null || { echo "missing required tool: $bin" >&2; exit 1; }
@@ -47,7 +50,8 @@ create_secret postgres-credentials \
   --from-literal=superuser-password="$(random 24)" \
   --from-literal=ai-reader-password="$(random 24)" \
   --from-literal=ai-writer-password="$(random 24)" \
-  --from-literal=litellm-password="$(random 24)"
+  --from-literal=litellm-password="$(random 24)" \
+  --from-literal=erp-integration-password="$(random 24)"
 
 create_secret keycloak-credentials \
   --from-literal=admin-password="$(random 16)" \
@@ -78,6 +82,7 @@ kubectl apply -k "$ROOT/deploy/base"
 kubectl -n platform rollout status statefulset/postgres --timeout=180s
 kubectl -n platform rollout status deployment/keycloak --timeout=300s
 kubectl -n platform rollout status deployment/scripted-llm --timeout=120s
+kubectl -n platform rollout status deployment/mcp-erp --timeout=120s
 kubectl -n platform rollout status deployment/litellm --timeout=600s
 kubectl -n platform wait --for=condition=complete job/llm-key-bootstrap --timeout=300s
 

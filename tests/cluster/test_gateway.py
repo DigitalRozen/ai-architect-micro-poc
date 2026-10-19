@@ -1,7 +1,5 @@
 """The LLM gateway authenticates, rate-limits, budgets and attributes every model call."""
 
-import socket
-import subprocess
 import time
 import uuid
 from collections.abc import Iterator
@@ -9,38 +7,16 @@ from collections.abc import Iterator
 import httpx
 import pytest
 
-from .conftest import NAMESPACE, read_secret
+from .conftest import port_forward, read_secret
 
 pytestmark = pytest.mark.cluster
-
-LOCAL_PORT = 14000
-GATEWAY = f"http://127.0.0.1:{LOCAL_PORT}"
-
-
-def _wait_for_port(port: int, timeout: float = 20) -> None:
-    deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        with socket.socket() as sock:
-            if sock.connect_ex(("127.0.0.1", port)) == 0:
-                return
-        time.sleep(0.2)
-    raise TimeoutError(f"port-forward to {port} did not come up")
 
 
 @pytest.fixture(scope="module")
 def gateway() -> Iterator[str]:
     """The gateway has no Ingress, so tests reach it through a port-forward."""
-    proc = subprocess.Popen(
-        ["kubectl", "-n", NAMESPACE, "port-forward", "svc/litellm", f"{LOCAL_PORT}:4000"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    try:
-        _wait_for_port(LOCAL_PORT)
-        yield GATEWAY
-    finally:
-        proc.terminate()
-        proc.wait(timeout=10)
+    with port_forward("litellm", 14000, 4000) as url:
+        yield url
 
 
 @pytest.fixture(scope="module")

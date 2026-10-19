@@ -80,3 +80,25 @@ def test_ai_writer_cannot_read_audit_log(psql):
     result = psql.run("ai_writer", "SELECT * FROM audit.events;")
     assert not result.ok
     assert "permission denied" in result.output
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "SELECT * FROM erp.inventory;",
+        "SELECT * FROM erp.sales_orders;",
+        "UPDATE ai.po_drafts SET quantity_kg = 999999;",
+        "DELETE FROM erp.purchase_orders;",
+        "UPDATE erp.purchase_orders SET total_eur = 1;",
+    ],
+)
+def test_erp_integration_role_can_only_do_the_approval_step(psql, statement):
+    result = psql.run("erp_integration", statement)
+    assert not result.ok, statement
+    assert "permission denied" in result.output
+
+
+def test_ai_writer_cannot_approve_drafts(psql):
+    result = psql.run("ai_writer", "UPDATE ai.po_drafts SET status = 'approved';")
+    assert not result.ok
+    assert "permission denied" in result.output

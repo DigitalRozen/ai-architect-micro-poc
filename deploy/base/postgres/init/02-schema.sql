@@ -45,6 +45,7 @@ CREATE TABLE erp.sales_orders (
 
 CREATE TABLE erp.purchase_orders (
     po_id         bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    draft_id      bigint NOT NULL UNIQUE,  -- every order traces back to one approved draft
     supplier_id   text NOT NULL REFERENCES erp.suppliers,
     material_id   text NOT NULL REFERENCES erp.materials,
     quantity_kg   numeric(12, 1) NOT NULL CHECK (quantity_kg > 0),
@@ -98,6 +99,12 @@ GRANT SELECT ON ai.inventory, ai.open_orders, ai.suppliers TO ai_reader, ai_writ
 GRANT SELECT, INSERT ON ai.po_drafts TO ai_writer;
 GRANT SELECT ON ai.po_drafts TO ai_reader;
 
+-- The approval path: flip a draft's status and create the order. Nothing else.
+GRANT USAGE ON SCHEMA ai, erp TO erp_integration;
+GRANT SELECT, UPDATE (status) ON ai.po_drafts TO erp_integration;
+GRANT SELECT ON erp.materials TO erp_integration;
+GRANT SELECT, INSERT ON erp.purchase_orders TO erp_integration;  -- SELECT for RETURNING
+
 -- ---------------------------------------------------------------- audit (append-only)
 CREATE SCHEMA audit;
 
@@ -126,5 +133,5 @@ CREATE TRIGGER events_no_truncate
     BEFORE TRUNCATE ON audit.events
     FOR EACH STATEMENT EXECUTE FUNCTION audit.reject_change();
 
-GRANT USAGE ON SCHEMA audit TO ai_writer;
-GRANT INSERT ON audit.events TO ai_writer;
+GRANT USAGE ON SCHEMA audit TO ai_writer, erp_integration;
+GRANT INSERT ON audit.events TO ai_writer, erp_integration;

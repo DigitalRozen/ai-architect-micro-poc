@@ -1,15 +1,12 @@
 """Keycloak issues tokens that downstream services can verify and authorize on."""
 
-import httpx
 import jwt
 import pytest
 
-from .conftest import read_secret
+from .conftest import ISSUER, password_grant
 
 pytestmark = pytest.mark.cluster
 
-ISSUER = "http://localhost:8080/auth/realms/kestrel"
-TOKEN_URL = f"{ISSUER}/protocol/openid-connect/token"
 JWKS_URL = f"{ISSUER}/protocol/openid-connect/certs"
 
 EXPECTED_ROLES = {
@@ -18,26 +15,6 @@ EXPECTED_ROLES = {
     "val": "viewer",
 }
 APP_ROLES = set(EXPECTED_ROLES.values())
-
-
-@pytest.fixture(scope="module")
-def passwords() -> dict[str, str]:
-    secret = read_secret("keycloak-credentials")
-    return {user: secret[f"demo-password-{user}"] for user in EXPECTED_ROLES}
-
-
-def password_grant(client_id: str, username: str, password: str) -> httpx.Response:
-    return httpx.post(
-        TOKEN_URL,
-        data={
-            "grant_type": "password",
-            "client_id": client_id,
-            "username": username,
-            "password": password,
-            "scope": "openid",
-        },
-        timeout=10,
-    )
 
 
 def verified_claims(access_token: str) -> dict:
