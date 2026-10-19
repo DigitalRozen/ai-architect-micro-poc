@@ -17,6 +17,11 @@ def kubectl(*args: str) -> str:
     ).stdout
 
 
+def read_secret(name: str) -> dict[str, str]:
+    raw = json.loads(kubectl("get", "secret", name, "-o", "json"))["data"]
+    return {key: base64.b64decode(value).decode() for key, value in raw.items()}
+
+
 @dataclass
 class SqlResult:
     ok: bool
@@ -27,11 +32,11 @@ class Psql:
     """Runs SQL inside the postgres pod as a given role, over TCP so passwords are checked."""
 
     def __init__(self) -> None:
-        raw = json.loads(kubectl("get", "secret", "postgres-credentials", "-o", "json"))["data"]
+        secret = read_secret("postgres-credentials")
         self._passwords = {
-            "ai_reader": base64.b64decode(raw["ai-reader-password"]).decode(),
-            "ai_writer": base64.b64decode(raw["ai-writer-password"]).decode(),
-            "postgres": base64.b64decode(raw["superuser-password"]).decode(),
+            "ai_reader": secret["ai-reader-password"],
+            "ai_writer": secret["ai-writer-password"],
+            "postgres": secret["superuser-password"],
         }
 
     def run(self, role: str, sql: str) -> SqlResult:

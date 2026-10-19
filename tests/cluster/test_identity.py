@@ -1,0 +1,89 @@
+"""Keycloak issues tokens that downstream services can verify and authorize on."""
+
+import httpx
+import jwt
+import pytest
+
+from .conftest import read_secret
+
+pytestmark = pytest.mark.cluster
+
+ISSUER = "http://localhost:8080/auth/realms/kestrel"
+TOKEN_URL = f"{ISSUER}/protocol/openid-connect/token"
+JWKS_URL = f"{ISSUER}/protocol/openid-connect/certs"
+
+EXPECTED_ROLES = {
+    "alice": "buyer",
+    "morgan": "procurement_manager",
+    "val": "viewer",
+}
+APP_ROLES = set(EXPECTED_ROLES.values())
+
+
+@pytest.fixture(scope="module")
+def passwords() -> dict[str, str]:
+    secret = read_secret("keycloak-credentials")
+    return {user: secret[f"demo-password-{user}"] for user in EXPECTED_ROLES}
+
+
+def password_grant(client_id: str, username: str, password: str) -> httpx.Response:
+    return httpx.post(
+        TOKEN_URL,
+        data={
+            "grant_type": "password",
+            "client_id": client_id,
+            "username": username,
+            "password": password,
+            "scope": "openid",
+        },
+        timeout=10,
+    )
+
+
+def verified_claims(access_token: str) -> dict:
+    signing_key = jwt.PyJWKClient(JWKS_URL).get_signing_key_from_jwt(access_token)
+    return jwt.decode(
+        access_token,
+        signing_key.key,
+        algorithms=["RS256"],
+        audience="mcp-erp",
+        issuer=ISSUER,
+    )
+
+
+@pytest.mark.parametrize("username", sorted(EXPECTED_ROLES))
+def test_each_user_gets_a_verifiable_token_with_exactly_their_role(passwords, username):
+    response = password_grant("smoke-test", username, passwords[username])
+    assert response.status_code == 200, response.text
+
+    claims = verified_claims(response.json()["access_token"])
+    assert claims["preferred_username"] == username
+    app_roles = set(claims["realm_access"]["roles"]) & APP_ROLES
+    assert app_roles == {EXPECTED_ROLES[username]}
+
+
+def test_buyer_cannot_approve(passwords):
+    """Separation of duties: the person who requests a PO is not the one who approves it."""
+    response = password_grant("smoke-test", "alice", passwords["alice"])
+    claims = verified_claims(response.json()["access_token"])
+    assert "procurement_manager" not in claims["realm_access"]["roles"]
+
+
+def test_wrong_password_is_rejected(passwords):
+    response = password_grant("smoke-test", "morgan", passwords["morgan"] + "x")
+    assert response.status_code == 401
+
+
+def test_agent_ui_client_does_not_allow_password_grant(passwords):
+    """The real application client only supports the browser flow (code + PKCE)."""
+    response = password_grant("agent-ui", "alice", passwords["alice"])
+    assert response.status_code in (400, 401)
+    assert response.json()["error"] in ("unauthorized_client", "invalid_client")
+
+
+def test_tampered_token_fails_verification(passwords):
+    token = password_grant("smoke-test", "val", passwords["val"]).json()["access_token"]
+    header, payload, signature = token.split(".")
+    tampered = f"{header}.{payload}.{signature[:-4]}AAAA"
+    with pytest.raises(jwt.InvalidSignatureError):
+        verified_claims(tampered)

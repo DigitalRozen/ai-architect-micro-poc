@@ -1,4 +1,4 @@
-.PHONY: help sync lint fmt test up down smoke
+.PHONY: help sync lint fmt test up down smoke creds
 
 CLUSTER := sovereign-agent
 
@@ -27,3 +27,6 @@ down: ## Delete the local cluster and all its data
 
 smoke: ## Run tests against the running cluster
 	uv run pytest -q -m cluster
+
+creds: ## Print demo user logins
+	./scripts/creds.sh
