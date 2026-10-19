@@ -58,4 +58,7 @@ spec:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             runAsNonRoot: true
+            # The image declares a named user, which the kubelet cannot verify as non-root.
+            runAsUser: 65532
+            runAsGroup: 65532
             capabilities: { drop: ["ALL"] }
