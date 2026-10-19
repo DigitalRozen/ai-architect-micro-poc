@@ -31,7 +31,7 @@ A planted prompt injection in the ERP data tries to make the agent submit an inf
 | # | Phase | Status |
 |---|---|---|
 | 0 | Repo skeleton, lint, tests, CI, secret scanning | done |
-| 1 | k3d cluster, Postgres, synthetic ERP data | planned |
+| 1 | k3d cluster, Postgres, synthetic ERP data, CI smoke test on k3d | done |
 | 2 | Keycloak realm, users, roles | planned |
 | 3 | LLM gateway with budgets and rate limits | planned |
 | 4 | MCP ERP tool server with per-tool authorization | planned |
@@ -39,14 +39,28 @@ A planted prompt injection in the ERP data tries to make the agent submit an inf
 | 6 | Agent, approval UI, audit, end-to-end scenario | planned |
 | 7 | Architecture docs, ADRs, demo script | planned |
 
-## Development
+## Quickstart
 
-Requires [uv](https://docs.astral.sh/uv/).
+Requires Docker, [k3d](https://k3d.io) v5.8+, kubectl, openssl and [uv](https://docs.astral.sh/uv/).
+Tested on Linux and WSL2 (Ubuntu); CI runs the same commands on every push.
 
 ```bash
-make sync   # install dev dependencies
+cp .env.example .env   # optional for now; all values may stay empty
+make sync              # install dev dependencies
+make up                # create the k3d cluster and deploy
+make smoke             # run tests against the live cluster
+make down              # delete the cluster and its data
+```
+
+`make smoke` currently proves the data boundary at the database level: the AI roles cannot read
+or write the core `erp` schema, can only create drafts in the `ai` schema, and the audit log
+rejects updates and deletes (see `tests/cluster/test_data_boundaries.py`).
+
+## Development
+
+```bash
 make lint   # ruff check + format check
-make test   # unit tests
+make test   # unit tests (no cluster needed)
 ```
 
 ## Docs
