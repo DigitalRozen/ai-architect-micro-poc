@@ -8,6 +8,7 @@ IMAGES=(
   scripted_llm:sovereign-agent/scripted-llm:dev
   mcp_erp:sovereign-agent/mcp-erp:dev
   sandbox_runner:sovereign-agent/sandbox-runner:dev
+  agent_api:sovereign-agent/agent-api:dev
 )
 # Base image for sandboxed runs, imported so they start without registry access.
 SANDBOX_IMAGE=python:3.13.13-slim
@@ -56,7 +57,8 @@ create_secret postgres-credentials \
   --from-literal=ai-reader-password="$(random 24)" \
   --from-literal=ai-writer-password="$(random 24)" \
   --from-literal=litellm-password="$(random 24)" \
-  --from-literal=erp-integration-password="$(random 24)"
+  --from-literal=erp-integration-password="$(random 24)" \
+  --from-literal=audit-reader-password="$(random 24)"
 
 create_secret keycloak-credentials \
   --from-literal=admin-password="$(random 16)" \
@@ -72,8 +74,11 @@ create_secret llm-keys \
   --from-literal=user-key-val="sk-$(random 24)"
 
 # The provider key is the one secret that comes from the operator rather than being generated.
+# The agent uses the real model only when a provider key is configured.
+AGENT_MODEL=agent-default
 # Passed on stdin so the key never appears in a process listing.
 if [[ -n "${OPENROUTER_API_KEY:-}" ]]; then
+  AGENT_MODEL=agent-openrouter
   printf '{"stringData":{"openrouter-api-key":"%s"}}' "$OPENROUTER_API_KEY" \
     | kubectl -n platform patch secret llm-keys --type merge --patch-file=/dev/stdin >/dev/null
   # Pick up a key added after the first deploy.
@@ -83,12 +88,14 @@ fi
 # Jobs are immutable; re-run the (idempotent) key bootstrap on every deploy.
 kubectl -n platform delete job llm-key-bootstrap --ignore-not-found >/dev/null
 kubectl apply -k "$ROOT/deploy/base"
+kubectl -n platform set env deployment/agent-api AGENT_MODEL="$AGENT_MODEL" >/dev/null
 
 kubectl -n platform rollout status statefulset/postgres --timeout=180s
 kubectl -n platform rollout status deployment/keycloak --timeout=300s
 kubectl -n platform rollout status deployment/scripted-llm --timeout=120s
 kubectl -n platform rollout status deployment/mcp-erp --timeout=120s
 kubectl -n platform rollout status deployment/sandbox-runner --timeout=120s
+kubectl -n platform rollout status deployment/agent-api --timeout=120s
 kubectl -n platform rollout status deployment/litellm --timeout=600s
 kubectl -n platform wait --for=condition=complete job/llm-key-bootstrap --timeout=300s
 
@@ -100,4 +107,5 @@ done
 curl -fsS -o /dev/null http://localhost:8080/auth/realms/kestrel \
   || { echo "Keycloak is not reachable on http://localhost:8080/auth" >&2; exit 1; }
 
-echo "Cluster is up. Run 'make smoke' to verify, 'make creds' for demo logins."
+echo "Cluster is up. Agent UI: http://localhost:8080/agent/  (model: $AGENT_MODEL)"
+echo "Run 'make smoke' to verify, 'make creds' for demo logins, 'make demo' for the scenario."

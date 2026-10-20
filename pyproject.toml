@@ -9,6 +9,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "agent-api",
     "httpx>=0.28.1",
     "mcp-erp",
     "pyjwt[crypto]>=2.15.1",
@@ -28,6 +29,7 @@ members = ["services/*"]
 scripted-llm = { workspace = true }
 mcp-erp = { workspace = true }
 sandbox-runner = { workspace = true }
+agent-api = { workspace = true }
 
 [tool.ruff]
 line-length = 100
@@ -35,6 +37,10 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI declares dependencies as argument defaults.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Form", "fastapi.Header"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S101", "S603", "S607", "S608"]  # tests build SQL from their own fixed values

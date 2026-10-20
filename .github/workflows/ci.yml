@@ -56,3 +56,4 @@ jobs:
           kubectl -n platform logs deployment/mcp-erp --tail=100
           kubectl -n platform logs deployment/sandbox-runner --tail=100
           kubectl -n sandbox get jobs,pods
+          kubectl -n platform logs deployment/agent-api --tail=100

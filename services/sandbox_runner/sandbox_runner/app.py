@@ -127,9 +127,14 @@ def run_job(code: str, input_json: str, requested_by: str) -> RunResult:
     output = ""
     if pod is not None:
         try:
-            output = core.read_namespaced_pod_log(
-                pod.metadata.name, NAMESPACE, limit_bytes=MAX_OUTPUT_BYTES
+            # Raw bytes: the client would otherwise parse JSON-looking logs and return a repr.
+            response = core.read_namespaced_pod_log(
+                pod.metadata.name,
+                NAMESPACE,
+                limit_bytes=MAX_OUTPUT_BYTES,
+                _preload_content=False,
             )
+            output = response.data.decode("utf-8", errors="replace")
         except client.ApiException:
             output = ""
     return RunResult(status=outcome[0], reason=outcome[1], output=output, job=name)

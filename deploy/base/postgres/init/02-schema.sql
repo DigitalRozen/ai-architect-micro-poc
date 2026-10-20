@@ -6,7 +6,7 @@
 
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON DATABASE erp FROM PUBLIC;
-GRANT CONNECT ON DATABASE erp TO ai_reader, ai_writer, erp_integration;
+GRANT CONNECT ON DATABASE erp TO ai_reader, ai_writer, erp_integration, audit_reader;
 
 -- ---------------------------------------------------------------- erp (core)
 CREATE SCHEMA erp;
@@ -133,5 +133,6 @@ CREATE TRIGGER events_no_truncate
     BEFORE TRUNCATE ON audit.events
     FOR EACH STATEMENT EXECUTE FUNCTION audit.reject_change();
 
-GRANT USAGE ON SCHEMA audit TO ai_writer, erp_integration;
+GRANT USAGE ON SCHEMA audit TO ai_writer, erp_integration, audit_reader;
 GRANT INSERT ON audit.events TO ai_writer, erp_integration;
+GRANT SELECT ON audit.events TO audit_reader;
