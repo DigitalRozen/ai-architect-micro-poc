@@ -16,11 +16,11 @@ QUANTITY_CODE = textwrap.dedent(
     """
     import json, os
     data = json.loads(os.environ["SANDBOX_INPUT"])
-    demand = sum(data["demand_kg"])
-    shortfall = demand + data["safety_stock_kg"] - data["available_kg"]
+    demand = int(sum(data["demand_kg"]))
+    shortfall = int(demand + data["safety_stock_kg"] - data["available_kg"])
     # Round up to the supplier's 1,000 kg lot size, respecting its minimum order.
     lots = -(-max(shortfall, 0) // 1000)
-    order_kg = max(lots * 1000, data["minimum_order_kg"])
+    order_kg = int(max(lots * 1000, data["minimum_order_kg"]))
     print(json.dumps({"demand_kg": demand, "shortfall_kg": shortfall, "order_kg": order_kg}))
     """
 ).strip()

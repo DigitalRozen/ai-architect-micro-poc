@@ -96,7 +96,10 @@ def test_no_credentials_no_root_no_writable_filesystem(runner, user_token):
         print(json.dumps({
             "uid": os.getuid(),
             "sa_token": os.path.exists("/var/run/secrets/kubernetes.io/serviceaccount/token"),
-            "env_secrets": [k for k in os.environ if "PASSWORD" in k or "KEY" in k],
+            # GPG_KEY is the base image's public release-signing key ID, not a secret.
+            "env_secrets": [k for k in os.environ
+                            if any(w in k for w in ("PASSWORD", "SECRET", "TOKEN", "API_KEY"))
+                            or os.environ[k].startswith("sk-")],
             "write_root": writable("/etc/pwned"),
             "write_tmp": writable("/tmp/scratch"),
         }))

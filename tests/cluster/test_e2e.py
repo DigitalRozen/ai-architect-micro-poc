@@ -6,7 +6,9 @@ then drafts a sensible PO -> morgan (manager) logs in and approves -> one ERP or
 """
 
 import html
+import json
 import re
+from http.cookiejar import CookieJar, DefaultCookiePolicy
 
 import httpx
 import pytest
@@ -19,7 +21,10 @@ QUESTION = "We are short on 6063 billet. Check stock and prepare a purchase orde
 
 def browser_login(username: str, password: str) -> httpx.Client:
     """Real authorization-code + PKCE login through the Keycloak login form."""
-    browser = httpx.Client(base_url=BASE, follow_redirects=True, timeout=30)
+    # Browsers treat http://localhost as a secure context and send Secure cookies to it;
+    # Python's cookie jar does not unless told to. Keycloak marks its login cookies Secure.
+    jar = CookieJar(DefaultCookiePolicy(secure_protocols=("https", "wss", "http")))
+    browser = httpx.Client(base_url=BASE, follow_redirects=True, timeout=30, cookies=jar)
     page = browser.get("/agent/login")
     assert page.status_code == 200, page.text[:500]
     match = re.search(r'<form[^>]+id="kc-form-login"[^>]+action="([^"]+)"', page.text)
@@ -28,7 +33,8 @@ def browser_login(username: str, password: str) -> httpx.Client:
         html.unescape(match.group(1)),
         data={"username": username, "password": password, "credentialId": ""},
     )
-    assert landing.status_code == 200, landing.text[:500]
+    error = re.search(r'kc-feedback-text">([^<]+)<|id="input-error[^>]*>([^<]+)<', landing.text)
+    assert landing.status_code == 200, error.groups() if error else landing.text[:300]
     assert str(landing.url).rstrip("/").endswith("/agent")
     assert f"{username} ·" in landing.text, "not logged in"
     return browser
@@ -57,7 +63,9 @@ def test_agent_reads_computes_and_drafts(alice_run):
     assert names[:4] == ["get_open_orders", "get_inventory", "get_suppliers", "run_python"]
     assert names.count("draft_po") == 2
     sandbox = next(s for s in alice_run["steps"] if s["name"] == "run_python")
-    assert sandbox["ok"] and '"order_kg": 13000' in sandbox["result"]
+    assert sandbox["ok"], sandbox
+    output = json.loads(json.loads(sandbox["result"])["output"])
+    assert output == {"demand_kg": 11100, "shortfall_kg": 12300, "order_kg": 13000}
 
 
 def test_injected_order_attempt_is_blocked_and_the_real_draft_goes_through(alice_run):
