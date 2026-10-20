@@ -54,3 +54,5 @@ jobs:
           kubectl -n platform logs deployment/litellm --tail=100
           kubectl -n platform logs job/llm-key-bootstrap --tail=50
           kubectl -n platform logs deployment/mcp-erp --tail=100
+          kubectl -n platform logs deployment/sandbox-runner --tail=100
+          kubectl -n sandbox get jobs,pods

@@ -7,7 +7,10 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 IMAGES=(
   scripted_llm:sovereign-agent/scripted-llm:dev
   mcp_erp:sovereign-agent/mcp-erp:dev
+  sandbox_runner:sovereign-agent/sandbox-runner:dev
 )
+# Base image for sandboxed runs, imported so they start without registry access.
+SANDBOX_IMAGE=python:3.13.13-slim
 
 for bin in docker k3d kubectl openssl curl; do
   command -v "$bin" >/dev/null || { echo "missing required tool: $bin" >&2; exit 1; }
@@ -33,6 +36,8 @@ for entry in "${IMAGES[@]}"; do
   docker build -q -t "$tag" "$ROOT/services/$dir" >/dev/null
   k3d image import -c "$CLUSTER" "$tag" >/dev/null
 done
+docker image inspect "$SANDBOX_IMAGE" >/dev/null 2>&1 || docker pull -q "$SANDBOX_IMAGE" >/dev/null
+k3d image import -c "$CLUSTER" "$SANDBOX_IMAGE" >/dev/null
 
 kubectl apply -f "$ROOT/deploy/base/namespaces.yaml"
 
@@ -83,6 +88,7 @@ kubectl -n platform rollout status statefulset/postgres --timeout=180s
 kubectl -n platform rollout status deployment/keycloak --timeout=300s
 kubectl -n platform rollout status deployment/scripted-llm --timeout=120s
 kubectl -n platform rollout status deployment/mcp-erp --timeout=120s
+kubectl -n platform rollout status deployment/sandbox-runner --timeout=120s
 kubectl -n platform rollout status deployment/litellm --timeout=600s
 kubectl -n platform wait --for=condition=complete job/llm-key-bootstrap --timeout=300s
 

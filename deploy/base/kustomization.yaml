@@ -9,6 +9,8 @@ resources:
   - litellm/deployment.yaml
   - litellm/key-bootstrap-job.yaml
   - mcp-erp/deployment.yaml
+  - sandbox/network-policy.yaml
+  - sandbox/runner.yaml
 
 # Init scripts run once, on first start of an empty data volume.
 # After editing them, recreate the cluster: make down up

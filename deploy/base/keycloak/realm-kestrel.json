@@ -9,9 +9,18 @@
   "accessTokenLifespan": 300,
   "roles": {
     "realm": [
-      { "name": "buyer", "description": "Can ask the agent to draft purchase orders" },
-      { "name": "procurement_manager", "description": "Can approve and submit purchase orders" },
-      { "name": "viewer", "description": "Read-only access to inventory and orders" }
+      {
+        "name": "buyer",
+        "description": "Can ask the agent to draft purchase orders"
+      },
+      {
+        "name": "procurement_manager",
+        "description": "Can approve and submit purchase orders"
+      },
+      {
+        "name": "viewer",
+        "description": "Read-only access to inventory and orders"
+      }
     ]
   },
   "clients": [
@@ -26,9 +35,15 @@
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
-      "redirectUris": ["http://localhost:8080/agent/*"],
-      "webOrigins": ["http://localhost:8080"],
-      "attributes": { "pkce.code.challenge.method": "S256" },
+      "redirectUris": [
+        "http://localhost:8080/agent/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8080"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
       "protocolMappers": [
         {
           "name": "audience-mcp-erp",
@@ -36,6 +51,16 @@
           "protocolMapper": "oidc-audience-mapper",
           "config": {
             "included.client.audience": "mcp-erp",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        },
+        {
+          "name": "audience-sandbox-runner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "sandbox-runner",
             "access.token.claim": "true",
             "id.token.claim": "false"
           }
@@ -72,8 +97,29 @@
             "access.token.claim": "true",
             "id.token.claim": "false"
           }
+        },
+        {
+          "name": "audience-sandbox-runner",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "sandbox-runner",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
         }
       ]
+    },
+    {
+      "clientId": "sandbox-runner",
+      "name": "Code sandbox (resource server)",
+      "description": "Audience only. Never used to log in.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "bearerOnly": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
     }
   ],
   "users": [
@@ -84,8 +130,16 @@
       "email": "alice@kestrel.example",
       "emailVerified": true,
       "enabled": true,
-      "realmRoles": ["buyer"],
-      "credentials": [{ "type": "password", "value": "${DEMO_PASSWORD_ALICE}", "temporary": false }]
+      "realmRoles": [
+        "buyer"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_PASSWORD_ALICE}",
+          "temporary": false
+        }
+      ]
     },
     {
       "username": "morgan",
@@ -94,8 +148,16 @@
       "email": "morgan@kestrel.example",
       "emailVerified": true,
       "enabled": true,
-      "realmRoles": ["procurement_manager"],
-      "credentials": [{ "type": "password", "value": "${DEMO_PASSWORD_MORGAN}", "temporary": false }]
+      "realmRoles": [
+        "procurement_manager"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_PASSWORD_MORGAN}",
+          "temporary": false
+        }
+      ]
     },
     {
       "username": "val",
@@ -104,8 +166,16 @@
       "email": "val@kestrel.example",
       "emailVerified": true,
       "enabled": true,
-      "realmRoles": ["viewer"],
-      "credentials": [{ "type": "password", "value": "${DEMO_PASSWORD_VAL}", "temporary": false }]
+      "realmRoles": [
+        "viewer"
+      ],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${DEMO_PASSWORD_VAL}",
+          "temporary": false
+        }
+      ]
     }
   ]
 }
