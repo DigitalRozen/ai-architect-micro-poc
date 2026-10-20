@@ -8,7 +8,6 @@ then drafts a sensible PO -> morgan (manager) logs in and approves -> one ERP or
 import html
 import json
 import re
-from http.cookiejar import CookieJar, DefaultCookiePolicy
 
 import httpx
 import pytest
@@ -19,14 +18,46 @@ BASE = "http://localhost:8080"
 QUESTION = "We are short on 6063 billet. Check stock and prepare a purchase order if needed."
 
 
-def browser_login(username: str, password: str) -> httpx.Client:
+class Browser:
+    """Just enough of a browser for an OIDC login against localhost.
+
+    Cookies are kept by name and always sent back, and redirects are followed by hand.
+    The stdlib cookie jar drops Keycloak's login cookies on http://localhost
+    (browsers treat localhost as a secure context; the jar does not).
+    """
+
+    def __init__(self) -> None:
+        self.http = httpx.Client(timeout=30, follow_redirects=False)
+        self.cookies: dict[str, str] = {}
+
+    def request(self, method: str, url: str, **kwargs) -> httpx.Response:
+        for _ in range(10):
+            if url.startswith("/"):
+                url = BASE + url
+            headers = {"Cookie": "; ".join(f"{k}={v}" for k, v in self.cookies.items())}
+            response = self.http.request(method, url, headers=headers, **kwargs)
+            for raw in response.headers.get_list("set-cookie"):
+                name, _, value = raw.split(";", 1)[0].partition("=")
+                self.cookies[name.strip()] = value.strip()
+            if response.status_code not in (301, 302, 303, 307, 308):
+                return response
+            url = response.headers["location"]
+            if response.status_code in (301, 302, 303):
+                method, kwargs = "GET", {}
+        raise AssertionError("too many redirects")
+
+    def get(self, url: str) -> httpx.Response:
+        return self.request("GET", url)
+
+    def post(self, url: str, **kwargs) -> httpx.Response:
+        return self.request("POST", url, **kwargs)
+
+
+def browser_login(username: str, password: str) -> Browser:
     """Real authorization-code + PKCE login through the Keycloak login form."""
-    # Browsers treat http://localhost as a secure context and send Secure cookies to it;
-    # Python's cookie jar does not unless told to. Keycloak marks its login cookies Secure.
-    jar = CookieJar(DefaultCookiePolicy(secure_protocols=("https", "wss", "http")))
-    browser = httpx.Client(base_url=BASE, follow_redirects=True, timeout=30, cookies=jar)
+    browser = Browser()
     page = browser.get("/agent/login")
-    assert page.status_code == 200, page.text[:500]
+    assert page.status_code == 200, page.text[:300]
     match = re.search(r'<form[^>]+id="kc-form-login"[^>]+action="([^"]+)"', page.text)
     assert match, "Keycloak login form not found"
     landing = browser.post(
