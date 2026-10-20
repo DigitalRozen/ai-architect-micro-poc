@@ -1,4 +1,4 @@
-.PHONY: help sync lint fmt test up down smoke creds
+.PHONY: help sync lint fmt test up down smoke creds demo
 
 CLUSTER := sovereign-agent
 
@@ -30,3 +30,6 @@ smoke: ## Run tests against the running cluster
 
 creds: ## Print demo user logins
 	./scripts/creds.sh
+
+demo: ## Run the procurement scenario from the terminal
+	./scripts/demo.sh
