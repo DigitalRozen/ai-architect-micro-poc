@@ -24,11 +24,11 @@ INSERT INTO erp.inventory (material_id, on_hand_kg, reserved_kg, safety_stock_kg
 
 INSERT INTO erp.sales_orders
   (order_id, customer, profile_code, material_id, billet_kg, due_date, status) VALUES
-  ('SO-1041', 'Brightline Windows (fictional)', 'WIN-FR-42', 'BIL-6063-178', 6800.0,
+  ('SO-1041', 'Pennowe Glazing (fictional)', 'WIN-FR-42', 'BIL-6063-178', 6800.0,
    DATE '2026-11-20', 'open'),
-  ('SO-1042', 'Meridian Solar Frames (fictional)', 'SOL-RL-08', 'BIL-6063-178', 4300.0,
+  ('SO-1042', 'Wrenholt Solar Frames (fictional)', 'SOL-RL-08', 'BIL-6063-178', 4300.0,
    DATE '2026-11-27', 'open'),
   ('SO-1043', 'Harbor Rail Interiors (fictional)', 'RAIL-TR-3', 'BIL-6082-203', 2200.0,
    DATE '2026-12-04', 'open'),
-  ('SO-1038', 'Brightline Windows (fictional)', 'WIN-FR-40', 'BIL-6060-152', 4100.0,
+  ('SO-1038', 'Pennowe Glazing (fictional)', 'WIN-FR-40', 'BIL-6060-152', 4100.0,
    DATE '2026-10-30', 'in_production');
