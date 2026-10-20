@@ -25,7 +25,7 @@ def test_login_redirect_uses_code_flow_with_pkce_and_state():
     login = login_request(settings)
     url = urlparse(login.url)
     params = {k: v[0] for k, v in parse_qs(url.query).items()}
-    assert url.path.endswith("/realms/kestrel/protocol/openid-connect/auth")
+    assert url.path.endswith("/realms/tarnwick/protocol/openid-connect/auth")
     assert params["response_type"] == "code"
     assert params["code_challenge_method"] == "S256"
     assert params["state"] == login.state

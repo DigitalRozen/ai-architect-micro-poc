@@ -101,10 +101,10 @@ kubectl -n platform wait --for=condition=complete job/llm-key-bootstrap --timeou
 
 # Traefik is installed by k3s asynchronously; wait until the public URL answers.
 for _ in $(seq 60); do
-  curl -fs -o /dev/null http://localhost:8080/auth/realms/kestrel && break
+  curl -fs -o /dev/null http://localhost:8080/auth/realms/tarnwick && break
   sleep 2
 done
-curl -fsS -o /dev/null http://localhost:8080/auth/realms/kestrel \
+curl -fsS -o /dev/null http://localhost:8080/auth/realms/tarnwick \
   || { echo "Keycloak is not reachable on http://localhost:8080/auth" >&2; exit 1; }
 
 echo "Cluster is up. Agent UI: http://localhost:8080/agent/  (model: $AGENT_MODEL)"

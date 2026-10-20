@@ -7,7 +7,7 @@ from mcp_erp.auth import Caller, KeycloakTokenVerifier
 from mcp_erp.policy import DraftRequest
 from mcp_erp.repository import DraftNotPending
 
-ISSUER = "http://localhost:8080/auth/realms/kestrel"
+ISSUER = "http://localhost:8080/auth/realms/tarnwick"
 
 
 @pytest.fixture(scope="session")
@@ -25,7 +25,7 @@ def make_token(signing_key):
             "sub": f"sub-{username}",
             "azp": "agent-ui",
             "preferred_username": username,
-            "realm_access": {"roles": [*roles, "default-roles-kestrel"]},
+            "realm_access": {"roles": [*roles, "default-roles-tarnwick"]},
             "iat": now,
             "exp": now + 300,
             **overrides,

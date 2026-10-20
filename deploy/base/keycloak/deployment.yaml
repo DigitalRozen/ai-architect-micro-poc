@@ -39,7 +39,7 @@ spec:
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef: { name: keycloak-credentials, key: admin-password }
-            # Placeholders in realm-kestrel.json are resolved from these at import time.
+            # Placeholders in realm-tarnwick.json are resolved from these at import time.
             - name: AGENT_UI_CLIENT_SECRET
               valueFrom:
                 secretKeyRef: { name: keycloak-credentials, key: agent-ui-client-secret }

@@ -87,7 +87,7 @@ def test_approval_endpoint_requires_a_valid_bearer_token(live_server):
 
 
 def test_unexpected_host_header_is_rejected(live_server, make_token):
-    headers = {**MCP_HEADERS, "Host": "attacker.example", "Authorization": f"Bearer {make_token()}"}
+    headers = {**MCP_HEADERS, "Host": "attacker.test", "Authorization": f"Bearer {make_token()}"}
     response = httpx2.post(f"{live_server}/mcp", json=LIST_TOOLS, headers=headers)
     assert response.status_code in (400, 421)
 

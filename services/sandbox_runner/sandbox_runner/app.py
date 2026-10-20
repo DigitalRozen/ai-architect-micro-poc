@@ -15,10 +15,10 @@ from pydantic import BaseModel, Field
 
 from .job import DEADLINE_SECONDS, NAMESPACE, CodeRejected, build_job, job_name
 
-ISSUER = os.environ.get("OIDC_ISSUER", "http://localhost:8080/auth/realms/kestrel")
+ISSUER = os.environ.get("OIDC_ISSUER", "http://localhost:8080/auth/realms/tarnwick")
 JWKS_URL = os.environ.get(
     "OIDC_JWKS_URL",
-    "http://keycloak.platform.svc.cluster.local:8080/auth/realms/kestrel/protocol/openid-connect/certs",
+    "http://keycloak.platform.svc.cluster.local:8080/auth/realms/tarnwick/protocol/openid-connect/certs",
 )
 AUDIENCE = "sandbox-runner"
 ALLOWED_ROLES = frozenset({"buyer", "procurement_manager"})

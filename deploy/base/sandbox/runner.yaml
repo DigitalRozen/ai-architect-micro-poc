@@ -55,9 +55,9 @@ spec:
           imagePullPolicy: Never
           env:
             - name: OIDC_ISSUER
-              value: http://localhost:8080/auth/realms/kestrel
+              value: http://localhost:8080/auth/realms/tarnwick
             - name: OIDC_JWKS_URL
-              value: http://keycloak.platform.svc.cluster.local:8080/auth/realms/kestrel/protocol/openid-connect/certs
+              value: http://keycloak.platform.svc.cluster.local:8080/auth/realms/tarnwick/protocol/openid-connect/certs
             - name: WRITER_PW
               valueFrom: { secretKeyRef: { name: postgres-credentials, key: ai-writer-password } }
             - name: AUDIT_DSN

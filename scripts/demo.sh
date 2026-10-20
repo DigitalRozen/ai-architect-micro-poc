@@ -4,7 +4,7 @@
 set -euo pipefail
 
 BASE=http://localhost:8080
-TOKEN_URL="$BASE/auth/realms/kestrel/protocol/openid-connect/token"
+TOKEN_URL="$BASE/auth/realms/tarnwick/protocol/openid-connect/token"
 
 secret() {
   kubectl -n platform get secret keycloak-credentials -o "jsonpath={.data.$1}" | base64 -d

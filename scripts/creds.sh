@@ -7,7 +7,7 @@ secret() {
 }
 
 echo "Keycloak: http://localhost:8080/auth/admin  (admin / $(secret admin-password))"
-echo "Demo users (realm 'kestrel'):"
+echo "Demo users (realm 'tarnwick'):"
 echo "  alice   buyer                $(secret demo-password-alice)"
 echo "  morgan  procurement_manager  $(secret demo-password-morgan)"
 echo "  val     viewer               $(secret demo-password-val)"

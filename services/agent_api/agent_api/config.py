@@ -3,7 +3,7 @@
 import os
 from dataclasses import dataclass, field
 
-REALM_PATH = "/realms/kestrel"
+REALM_PATH = "/realms/tarnwick"
 
 
 def _env(name: str, default: str = "") -> str:

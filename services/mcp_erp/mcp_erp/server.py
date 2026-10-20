@@ -16,11 +16,11 @@ from .policy import DraftRequest, PolicyDenied
 from .repository import DraftNotPending, PostgresRepository
 from .service import ErpService
 
-ISSUER = os.environ.get("OIDC_ISSUER", "http://localhost:8080/auth/realms/kestrel")
+ISSUER = os.environ.get("OIDC_ISSUER", "http://localhost:8080/auth/realms/tarnwick")
 # The issuer is the public URL; keys are fetched over the cluster network.
 JWKS_URL = os.environ.get(
     "OIDC_JWKS_URL",
-    "http://keycloak.platform.svc.cluster.local:8080/auth/realms/kestrel/protocol/openid-connect/certs",
+    "http://keycloak.platform.svc.cluster.local:8080/auth/realms/tarnwick/protocol/openid-connect/certs",
 )
 AUDIENCE = "mcp-erp"
 RESOURCE_URL = os.environ.get(

@@ -1,6 +1,6 @@
 {
-  "realm": "kestrel",
-  "displayName": "Kestrel Extrusions (fictional)",
+  "realm": "tarnwick",
+  "displayName": "Tarnwick Components (fictional)",
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": false,
@@ -127,7 +127,7 @@
       "username": "alice",
       "firstName": "Alice",
       "lastName": "Buyer",
-      "email": "alice@kestrel.example",
+      "email": "alice@tarnwick.test",
       "emailVerified": true,
       "enabled": true,
       "realmRoles": [
@@ -145,7 +145,7 @@
       "username": "morgan",
       "firstName": "Morgan",
       "lastName": "Manager",
-      "email": "morgan@kestrel.example",
+      "email": "morgan@tarnwick.test",
       "emailVerified": true,
       "enabled": true,
       "realmRoles": [
@@ -163,7 +163,7 @@
       "username": "val",
       "firstName": "Val",
       "lastName": "Viewer",
-      "email": "val@kestrel.example",
+      "email": "val@tarnwick.test",
       "emailVerified": true,
       "enabled": true,
       "realmRoles": [

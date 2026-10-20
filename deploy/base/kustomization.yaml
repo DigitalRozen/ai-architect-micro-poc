@@ -25,7 +25,7 @@ configMapGenerator:
   - name: keycloak-realm
     namespace: platform
     files:
-      - keycloak/realm-kestrel.json
+      - keycloak/realm-tarnwick.json
   - name: litellm-config
     namespace: platform
     files:

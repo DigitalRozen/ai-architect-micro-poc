@@ -10,7 +10,7 @@ An agent drafts purchase orders against an ERP. It acts with the user's identity
 
 ## The scenario
 
-A buyer at *Kestrel Extrusions* (a fictional aluminum-profile extruder) asks: *"We are short on 6063 billet. Check stock and prepare a purchase order if needed."*
+A buyer at *Tarnwick Components* (a fictional industrial-parts maker that extrudes its own aluminum profiles) asks: *"We are short on 6063 billet. Check stock and prepare a purchase order if needed."*
 
 1. The agent reads open orders, inventory and suppliers through the **MCP tool server**, which only sees a separate AI data layer.
 2. It computes the order quantity with model-written Python in a **sandboxed Kubernetes Job**: no network, no credentials, a 15-second deadline.

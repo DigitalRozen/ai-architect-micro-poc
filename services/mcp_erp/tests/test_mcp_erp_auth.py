@@ -15,14 +15,14 @@ def test_valid_token_yields_caller_with_app_roles_only(verifier, make_token):
     assert access.subject == "sub-morgan"
     caller = Caller.from_claims(access.claims)
     assert caller.username == "morgan"
-    assert caller.roles == {"procurement_manager"}  # default-roles-kestrel is dropped
+    assert caller.roles == {"procurement_manager"}  # default-roles-tarnwick is dropped
 
 
 @pytest.mark.parametrize(
     "overrides",
     [
         {"aud": "account"},  # issued for another audience
-        {"iss": "http://evil.example/realms/kestrel"},
+        {"iss": "http://evil.example.com/realms/tarnwick"},
         {"exp": int(time.time()) - 10},
     ],
     ids=["wrong-audience", "wrong-issuer", "expired"],

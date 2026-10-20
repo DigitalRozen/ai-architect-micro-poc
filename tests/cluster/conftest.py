@@ -14,7 +14,7 @@ import pytest
 
 NAMESPACE = "platform"
 POD = "postgres-0"
-ISSUER = "http://localhost:8080/auth/realms/kestrel"
+ISSUER = "http://localhost:8080/auth/realms/tarnwick"
 TOKEN_URL = f"{ISSUER}/protocol/openid-connect/token"
 DEMO_USERS = ("alice", "morgan", "val")
 
